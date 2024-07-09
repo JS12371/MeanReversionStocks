@@ -35,30 +35,42 @@ def calculate_inverse_percentile(percentile):
 
 # Streamlit app
 def main():
-    st.title('Bitcoin Moving Average Analysis')
-    st.write('This app calculates the recent percent change in the 4-year moving average of Bitcoin prices and determines the percent allocation based on the percentile of that change.')
-
+    st.set_page_config(page_title="Bitcoin Moving Average Analysis", layout="wide")
+    
+    st.title('📈 Bitcoin Mean Reversion Model')
+    st.markdown('This app calculates the recent percent change in the 4-year moving average of Bitcoin prices and determines the percent allocation based on the percentile of that change.')
+    
+    st.sidebar.header('Settings')
+    window_4yr = st.sidebar.slider('4-Year Moving Average Window (days)', 365, 1825, 4*365)
+    window_240d = st.sidebar.slider('240-Day Moving Average Window (days)', 120, 360, 240)
+    
     btc_data = import_bitcoin_data()
-    btc_data_ma = calculate_moving_average(btc_data)
+    btc_data_ma = calculate_moving_average(btc_data, window_4yr)
     btc_data_pct_change = calculate_pct_change(btc_data_ma)
 
     recent_pct_change, percentile, shortMApctChanges = calculate_percentile(btc_data_pct_change)
     inverse_percentile = calculate_inverse_percentile(percentile)
 
-    st.write(f"Recent Percent Change in 4-Year Moving Average: {recent_pct_change:.2f}%")
-    st.write(f"Percentile of Recent Change: {percentile:.2f}%")
-    st.write(f"Most Recent 240d MA Change: {btc_data_pct_change['240d_MA_pct_change'].iloc[-1]:.2f}%")
-
+    st.markdown("### Recent Analysis Results")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    col1.metric("Recent % Change in 4-Year MA", f"{recent_pct_change:.2f}%")
+    col2.metric("Percentile of Recent Change", f"{percentile:.2f}%")
+    col3.metric("Most Recent 240d MA Change", f"{btc_data_pct_change['240d_MA_pct_change'].iloc[-1]:.2f}%")
+    col4.metric("Inverse Percentile (Capital in BTC)", f"{inverse_percentile:.2f}%")
+    
     if shortMApctChanges.iloc[-1] > 0:
-        st.write("Short-term trend is up")
+        st.success("Short-term trend is up")
     else:
-        st.write("Short-term trend is down, therefore no position is taken.")
+        st.warning("Short-term trend is down, therefore no position is taken.")
         inverse_percentile = 0
 
-    st.write(f"Inverse Percentile (Percent Capital into Bitcoin): {inverse_percentile:.2f}%")
+    st.write("---")
 
+    st.markdown("### Bitcoin Price and Moving Averages")
     st.line_chart(btc_data[['Close', '4yr_MA', '240d_MA']][1460:])
     
+    st.markdown("### Moving Averages % Change")
     if 'MA_pct_change' in btc_data_ma.columns and '240d_MA_pct_change' in btc_data_ma.columns:
         st.line_chart(btc_data_ma[['MA_pct_change', '240d_MA_pct_change']])
     else:
