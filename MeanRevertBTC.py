@@ -34,23 +34,27 @@ def calculate_inverse_percentile(percentile):
 
 # Main function to run the analysis
 def main():
-    btc_data = import_bitcoin_data()
-    btc_data_ma = calculate_moving_average(btc_data)
-    btc_data_pct_change = calculate_pct_change(btc_data_ma)
-    recent_pct_change, percentile, shortMApctChanges = calculate_percentile(btc_data_pct_change)
-    inverse_percentile = calculate_inverse_percentile(percentile)
+    while True:
+        btc_data = import_bitcoin_data()
+        btc_data_ma = calculate_moving_average(btc_data)
+        btc_data_pct_change = calculate_pct_change(btc_data_ma)
+        recent_pct_change, percentile, shortMApctChanges = calculate_percentile(btc_data_pct_change)
+        inverse_percentile = calculate_inverse_percentile(percentile)
 
-    if shortMApctChanges.iloc[-1] > 0:
-        print("Short-term trend is up")
-    else:
-        print("Short-term trend is down, therefore no position is taken.")
-        inverse_percentile = 0
+        if shortMApctChanges.iloc[-1] > 0:
+            print("Short-term trend is up")
+        else:
+            print("Short-term trend is down, therefore no position is taken.")
+            inverse_percentile = 0
 
 
-    print(f"Recent Percent Change in 4-Year Moving Average: {recent_pct_change:.2f}%")
-    print(f"Percentile of Recent Change: {percentile:.2f}%")
-    print(f"Most Recent 240d MA Change: {btc_data_pct_change['240d_MA_pct_change'].iloc[-1]:.2f}%")
-    print(f"Inverse Percentile (Percent Capital into Bitcoin): {inverse_percentile:.2f}%")
+        print(f"Recent Percent Change in 4-Year Moving Average: {recent_pct_change:.2f}%")
+        print(f"Percentile of Recent Change: {percentile:.2f}%")
+        print(f"Most Recent 240d MA Change: {btc_data_pct_change['240d_MA_pct_change'].iloc[-1]:.2f}%")
+        print(f"Inverse Percentile (Percent Capital into Bitcoin): {inverse_percentile:.2f}%")
+        ##sleep for a day
+        import time
+        time.sleep(86400)
 
 if __name__ == "__main__":
     main()
